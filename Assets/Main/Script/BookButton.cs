@@ -1,41 +1,54 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static Unity.Burst.Intrinsics.X86.Avx;
 
 public class BookButton : MonoBehaviour
 {
+    // 병합 데이터 관리 스크립트
     public Merge mg;
+
+    // 활성화 표시용 이미지
     public GameObject image;
 
+    // 책 번호
     public int booknum;
 
     private void Awake()
     {
-        Button tmp = gameObject.GetComponent<Button>();
-        ColorBlock cb = tmp.colors;
+        image.SetActive(false);
 
-        Color newcolor = new Color(0, 0, 0, 0);
+        // 버튼 컴포넌트 가져오기
+        Button button = GetComponent<Button>();
 
-        cb.normalColor = newcolor;
-        cb.selectedColor = newcolor;
-        cb.disabledColor = newcolor;
-        cb.pressedColor = newcolor;
+        // 버튼 색상 설정
+        ColorBlock colors = button.colors;
+        Color transparentColor = new Color(0f, 0f, 0f, 0f);
 
-        if (GameObject.Find("ItemData").transform.GetComponent<Merge>().itemdata[booknum].spawncheck == true)
+        colors.normalColor = transparentColor;
+        colors.selectedColor = transparentColor;
+        colors.disabledColor = transparentColor;
+        colors.pressedColor = transparentColor;
+
+        // 해당 아이템이 해금된 경우 처리
+        if (GameObject.Find("ItemData").GetComponent<Merge>().itemdata[booknum].spawncheck == true)
         {
-            tmp.colors = cb;
+            button.colors = colors;
 
+            // 이미지 표시
             image.SetActive(true);
         }
     }
 
     public void but_event()
     {
-        if (GameObject.Find("ItemData").transform.GetComponent<Merge>().itemdata[booknum].spawncheck == true)
+        // 아이템이 해금된 경우에만 패널 생성
+        if (GameObject.Find("ItemData").GetComponent<Merge>().itemdata[booknum].spawncheck == true)
         {
-            Instantiate(mg.itemdata[booknum].panel, new Vector3(0, 0, 0), Quaternion.identity, GameObject.Find("Canvas").transform);
+            Instantiate(
+                mg.itemdata[booknum].panel,
+                Vector3.zero,
+                Quaternion.identity,
+                GameObject.Find("Canvas").transform
+            );
         }
     }
 }

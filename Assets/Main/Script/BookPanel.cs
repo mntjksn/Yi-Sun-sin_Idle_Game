@@ -1,13 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BookPanel : MonoBehaviour
 {
-    public GameObject panel, Page_1, Page_2, Page_3;
+    // 전체 패널과 각 페이지 오브젝트
+    public GameObject panel;
+    public GameObject Page_1;
+    public GameObject Page_2;
+    public GameObject Page_3;
 
     public void OnPanel()
     {
+        // 패널 열기와 첫 페이지 표시
         panel.SetActive(true);
         Page_1.SetActive(true);
         Page_2.SetActive(false);
@@ -16,19 +19,21 @@ public class BookPanel : MonoBehaviour
 
     public void OffPanel()
     {
+        // 패널 닫기
         panel.SetActive(false);
     }
 
     public void leftbut()
     {
-        if (Page_1.activeSelf == false && Page_2.activeSelf == false && Page_3.activeSelf == true)
+        // 오른쪽 페이지에서 가운데 페이지로 이동
+        if (Page_3.activeSelf == true)
         {
             Page_1.SetActive(false);
             Page_2.SetActive(true);
             Page_3.SetActive(false);
         }
-
-        else if (Page_1.activeSelf == false && Page_2.activeSelf == true && Page_3.activeSelf == false)
+        // 가운데 페이지에서 첫 페이지로 이동
+        else if (Page_2.activeSelf == true)
         {
             Page_1.SetActive(true);
             Page_2.SetActive(false);
@@ -38,14 +43,15 @@ public class BookPanel : MonoBehaviour
 
     public void rightbut()
     {
-        if (Page_1.activeSelf == true && Page_2.activeSelf == false && Page_3.activeSelf == false)
+        // 첫 페이지에서 가운데 페이지로 이동
+        if (Page_1.activeSelf == true)
         {
             Page_1.SetActive(false);
             Page_2.SetActive(true);
             Page_3.SetActive(false);
         }
-
-        else if (Page_1.activeSelf == false && Page_2.activeSelf == true && Page_3.activeSelf == false)
+        // 가운데 페이지에서 오른쪽 페이지로 이동
+        else if (Page_2.activeSelf == true)
         {
             Page_1.SetActive(false);
             Page_2.SetActive(false);

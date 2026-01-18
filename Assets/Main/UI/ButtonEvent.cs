@@ -1,159 +1,114 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ButtonEvent : MonoBehaviour
 {
-    public bool game1, game2, game3, etc;
+    // 어떤 버튼인지 구분
+    public bool game1;
+    public bool game2;
+    public bool game3;
+    public bool etc;
+
+    private Button button;
+
+    private void Awake()
+    {
+        // 버튼 캐시
+        button = GetComponent<Button>();
+    }
 
     private void Update()
     {
+        // 현재 재화 불러오기
         int gold = PlayerPrefs.GetInt("Gold");
-        int bossticket = PlayerPrefs.GetInt("BossTicket");
+        int bossTicket = PlayerPrefs.GetInt("BossTicket");
 
+        // 버튼 활성 조건 처리
         if (game1 == true)
         {
-            if (gold >= 100)
-                gameObject.GetComponent<Button>().interactable = true;
-            else
-                gameObject.GetComponent<Button>().interactable = false;
+            button.interactable = gold >= 100;
         }
 
         if (game2 == true)
         {
-            if (gold >= 200)
-                gameObject.GetComponent<Button>().interactable = true;
-            else
-                gameObject.GetComponent<Button>().interactable = false;
+            button.interactable = gold >= 200;
         }
 
         if (game3 == true)
         {
-            if (bossticket >= 1)
-                gameObject.GetComponent<Button>().interactable = true;
-            else
-                gameObject.GetComponent<Button>().interactable = false;
+            button.interactable = bossTicket >= 1;
         }
     }
 
     public void SceneLoader(string sceneName)
     {
+        // 현재 재화 불러오기
         int gold = PlayerPrefs.GetInt("Gold");
-        int bossticket = PlayerPrefs.GetInt("BossTicket");
+        int bossTicket = PlayerPrefs.GetInt("BossTicket");
 
-        if (gold >= 100 && game1 == true)
+        // 게임 1 입장
+        if (game1 == true && gold >= 100)
         {
-            gold -= (100);
-
+            gold -= 100;
             PlayerPrefs.SetInt("Gold", gold);
 
-            int x = SceneManager.GetActiveScene().buildIndex;
-            int chc = GameObject.Find("chp").transform.childCount;
-
-            SceneManager.LoadScene(sceneName);
-
-            Time.timeScale = 1f;
-
-            if (x == 2 || x == 3 || x == 4)
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(false);
-                }
-            }
+            LoadSceneAndHandleChp(sceneName);
+            return;
         }
 
-        if (gold >= 200 && game2 == true)
+        // 게임 2 입장
+        if (game2 == true && gold >= 200)
         {
-            gold -= (200);
-
+            gold -= 200;
             PlayerPrefs.SetInt("Gold", gold);
 
-            int x = SceneManager.GetActiveScene().buildIndex;
-            int chc = GameObject.Find("chp").transform.childCount;
-
-            SceneManager.LoadScene(sceneName);
-
-            Time.timeScale = 1f;
-
-            if (x == 2 || x == 3 || x == 4)
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(false);
-                }
-            }
+            LoadSceneAndHandleChp(sceneName);
+            return;
         }
 
-        if (bossticket >= 1 && game3 == true)
+        // 게임 3 입장
+        if (game3 == true && bossTicket >= 1)
         {
-            bossticket -= 1;
+            bossTicket -= 1;
+            PlayerPrefs.SetInt("BossTicket", bossTicket);
 
-            PlayerPrefs.SetInt("BossTicket", bossticket);
-
-            int x = SceneManager.GetActiveScene().buildIndex;
-            int chc = GameObject.Find("chp").transform.childCount;
-
-            SceneManager.LoadScene(sceneName);
-
-            Time.timeScale = 1f;
-
-            if (x == 2 || x == 3 || x == 4)
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(false);
-                }
-            }
+            LoadSceneAndHandleChp(sceneName);
+            return;
         }
 
+        // 기타 씬 이동
         if (etc == true)
         {
-            int x = SceneManager.GetActiveScene().buildIndex;
-            int chc = GameObject.Find("chp").transform.childCount;
+            LoadSceneAndHandleChp(sceneName);
+        }
+    }
 
-            SceneManager.LoadScene(sceneName);
+    private void LoadSceneAndHandleChp(string sceneName)
+    {
+        // 현재 씬 정보와 자식 수를 먼저 확보
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
 
-            Time.timeScale = 1f;
+        GameObject chp = GameObject.Find("chp");
+        int childCount = 0;
+        if (chp != null)
+        {
+            childCount = chp.transform.childCount;
+        }
 
-            if (x == 2 || x == 3 || x == 4)
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < chc; i++)
-                {
-                    GameObject.Find("chp").transform.GetChild(i).gameObject.SetActive(false);
-                }
-            }
+        // 씬 이동
+        SceneManager.LoadScene(sceneName);
+        Time.timeScale = 1f;
 
+        // 기존 코드 흐름 그대로 유지
+        // 특정 씬에서만 chp 자식들을 활성화하고 그 외에는 비활성화
+        bool shouldEnable = (currentSceneIndex == 2 || currentSceneIndex == 3 || currentSceneIndex == 4);
+
+        if (chp == null) return;
+
+        for (int i = 0; i < childCount; i++)
+        {
+            chp.transform.GetChild(i).gameObject.SetActive(shouldEnable);
         }
     }
 }

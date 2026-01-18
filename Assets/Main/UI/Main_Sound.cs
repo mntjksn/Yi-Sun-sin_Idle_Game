@@ -1,42 +1,37 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Main_Sound : MonoBehaviour
 {
-    public AudioSource bgm;
-    public bool main, effect;
+    [Header("Audio")]
+    public AudioSource bgm;   // 제어할 오디오 소스
 
-    // Update is called once per frame
+    [Header("Type")]
+    public bool main;         // 메인 BGM 여부
+    public bool effect;       // 효과음 여부
+
     void Update()
     {
-        int main_bgm = PlayerPrefs.GetInt("BGM");
-        int effect_bgm = PlayerPrefs.GetInt("EFFECT");
+        // PlayerPrefs에 저장된 사운드 설정 값 가져오기
+        // 0 = 켜짐, 1 = 꺼짐
+        int mainBgm = PlayerPrefs.GetInt("BGM");
+        int effectBgm = PlayerPrefs.GetInt("EFFECT");
 
-        if (main == true)
+        // 메인 BGM 설정 처리
+        if (main)
         {
-            if (main_bgm == 0)
-            {
+            if (mainBgm == 0)
                 bgm.mute = false;
-            }
-
-            if (main_bgm == 1)
-            {
+            else if (mainBgm == 1)
                 bgm.mute = true;
-            }
         }
 
-        if (effect == true)
+        // 효과음 설정 처리
+        if (effect)
         {
-            if (effect_bgm == 0)
-            {
+            if (effectBgm == 0)
                 bgm.mute = false;
-            }
-
-            if (effect_bgm == 1)
-            {
+            else if (effectBgm == 1)
                 bgm.mute = true;
-            }
         }
     }
 }

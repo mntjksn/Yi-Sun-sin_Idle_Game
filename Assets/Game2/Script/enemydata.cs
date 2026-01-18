@@ -1,173 +1,211 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class enemydata : MonoBehaviour
 {
+    // 적 체력
     public float hp;
-    public int atk;
-    public GameObject Player;
-    public GameObject castle;
-    public GameObject enemyspawn;
-    public List<GameObject> FoundObjects;
-    public float shortDis;
-    public float speed;
-    Animator animator;
-    public Transform boxpos;
-    public Vector2 boxSize;
-    Rigidbody2D myrigidbody;
 
+    // 적 공격력
+    public int atk;
+
+    // 가장 가까운 플레이어 오브젝트
+    public GameObject Player;
+
+    // 성 오브젝트
+    public GameObject castle;
+
+    // 스폰 매니저 오브젝트
+    public GameObject enemyspawn;
+
+    // 플레이어 검색 결과 목록
+    public List<GameObject> FoundObjects;
+
+    // 가장 가까운 플레이어까지 거리
+    public float shortDis;
+
+    // 이동 속도
+    public float speed;
+
+    // 공격 판정 박스 위치
+    public Transform boxpos;
+
+    // 공격 판정 박스 크기
+    public Vector2 boxSize;
+
+    // 스프라이트 렌더러
     public SpriteRenderer sprite;
+
+    // 현재 코인 수
     public int curcoin;
 
+    // 공격 사운드
     public AudioSource shootbgm;
 
-    // Start is called before the first frame update
-    void Start()
+    // 내부 컴포넌트
+    private Animator animator;
+    private Rigidbody2D myrigidbody;
+
+    // 스폰 매니저 컴포넌트 캐시
+    private enemySpawn enemySpawnComp;
+
+    private void Start()
     {
+        // 컴포넌트 가져오기
         sprite = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-        castle = GameObject.Find("castle");
         myrigidbody = GetComponent<Rigidbody2D>();
+
+        // 참조 오브젝트 찾기
+        castle = GameObject.Find("castle");
         enemyspawn = GameObject.Find("enemySpawn");
-        //atk = 5;
+
+        // 스폰 매니저 컴포넌트 캐시
+        if (enemyspawn != null)
+        {
+            enemySpawnComp = enemyspawn.GetComponent<enemySpawn>();
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        int effect_sound = PlayerPrefs.GetInt("EFFECT");
+        // 효과음 설정 적용
+        int effectSound = PlayerPrefs.GetInt("EFFECT");
+        if (effectSound == 0) shootbgm.mute = false;
+        if (effectSound == 1) shootbgm.mute = true;
 
-        if (effect_sound == 0)
+        // 사망 처리
+        if (hp < 0f)
         {
-            shootbgm.mute = false;
-        }
+            if (enemySpawnComp != null)
+            {
+                enemySpawnComp.cur -= 1;
+                enemySpawnComp.dieenemy += 1;
+            }
 
-        if (effect_sound == 1)
-        {
-            shootbgm.mute = true;
-        }
-
-        if (hp < 0)
-        {
-            Destroy(gameObject);
-            enemyspawn.GetComponent<enemySpawn>().cur -= 1;
-            enemyspawn.GetComponent<enemySpawn>().dieenemy += 1;
             curcoin = PlayerPrefs.GetInt("GameGold");
             curcoin += 1;
             PlayerPrefs.SetInt("GameGold", curcoin);
+
+            Destroy(gameObject);
+            return;
         }
+
+        // 가장 가까운 플레이어 찾기
+        shortD();
+
+        // 타겟에 따라 이동과 공격 상태 변경
         if (Player == false)
         {
-            if (Vector2.Distance(gameObject.transform.position, castle.transform.position) < 13f && Vector2.Distance(gameObject.transform.position, castle.transform.position) >= 2.0f)
+            if (castle == null) return;
+
+            float distToCastle = Vector2.Distance(transform.position, castle.transform.position);
+
+            if (distToCastle < 13f && distToCastle >= 2.0f)
             {
                 animator.SetBool("isattack", false);
                 transform.position = Vector2.MoveTowards(transform.position, castle.transform.position, Time.deltaTime * speed);
-                
             }
-            else if(Vector2.Distance(gameObject.transform.position, castle.transform.position) < 3.8f)
-            {
-                animator.SetBool("isattack",true);
-                //Debug.Log("1");
-            }
-        }
-        else
-        {
-            if(Vector2.Distance(gameObject.transform.position, Player.transform.position) < 13f && Vector2.Distance(gameObject.transform.position, Player.transform.position) >= 1f)
-                {
-                    animator.SetBool("isattack", false);
-                    transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, Time.deltaTime * speed);
-                }
-            else if(Vector2.Distance(gameObject.transform.position, Player.transform.position) < 1f)
+            else if (distToCastle < 3.8f)
             {
                 animator.SetBool("isattack", true);
             }
         }
-        shortD();
-        //die();
-        
-        /*else if (Vector2.Distance(gameObject.transform.position, Player.transform.position) < 4f && Vector2.Distance(gameObject.transform.position, Player.transform.position) >=1f)
+        else
         {
-            transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, Time.deltaTime * speed);
-        }*/
+            float distToPlayer = Vector2.Distance(transform.position, Player.transform.position);
 
-        /*else if (Vector2.Distance(gameObject.transform.position, castle.transform.position) < 3.8f)
-        {
-            attack();
-        }*/
-        //Debug.Log(Vector2.Distance(gameObject.transform.position, Player.transform.position));
-
-    }
-    void die()
-    {
-        hp -= Time.deltaTime;
-        if(hp < 0)
-        {
-            Destroy(gameObject);
-            GameObject.Find("enemySpawn").GetComponent<enemySpawn>().max -= 1;
-            //hp = 5;
+            if (distToPlayer < 13f && distToPlayer >= 1f)
+            {
+                animator.SetBool("isattack", false);
+                transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, Time.deltaTime * speed);
+            }
+            else if (distToPlayer < 1f)
+            {
+                animator.SetBool("isattack", true);
+            }
         }
     }
-    void shortD()
+
+    private void shortD()
     {
+        // 플레이어 태그 오브젝트 중 가장 가까운 대상 선택
         try
         {
             FoundObjects = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
-            shortDis = Vector3.Distance(gameObject.transform.position, FoundObjects[0].transform.position);
+            if (FoundObjects == null || FoundObjects.Count == 0)
+            {
+                Player = null;
+                shortDis = 0f;
+                return;
+            }
+
             Player = FoundObjects[0];
+            shortDis = Vector3.Distance(transform.position, Player.transform.position);
+
             foreach (GameObject found in FoundObjects)
             {
-                float Distance = Vector3.Distance(gameObject.transform.position, found.transform.position);
-
-                if (Distance < shortDis) // 위에서 잡은 기준으로 거리 재기
+                float distance = Vector3.Distance(transform.position, found.transform.position);
+                if (distance < shortDis)
                 {
                     Player = found;
-                    shortDis = Distance;
+                    shortDis = distance;
                 }
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Debug.Log(ex);
         }
     }
-    void attack()
+
+    private void attack()
     {
+        // 공격 사운드 재생
         shootbgm.Play();
 
-        Collider2D[] collider2Ds = Physics2D.OverlapBoxAll(boxpos.position, boxSize, 0);
+        // 공격 범위 안의 오브젝트 확인
+        Collider2D[] collider2Ds = Physics2D.OverlapBoxAll(boxpos.position, boxSize, 0f);
+
         foreach (Collider2D collider in collider2Ds)
         {
-            if (collider.tag == "player")
+            // 플레이어 피격 처리
+            if (collider.CompareTag("player"))
             {
-                
-                GameObject.FindGameObjectWithTag("player").GetComponent<Spawn>().hp -= atk;
-                if(GameObject.FindGameObjectWithTag("player").GetComponent<Spawn>().hp > 0)
+                Spawn playerSpawn = GameObject.FindGameObjectWithTag("player").GetComponent<Spawn>();
+                playerSpawn.hp -= atk;
+
+                if (playerSpawn.hp > 0)
                 {
-                    StartCoroutine(GameObject.FindGameObjectWithTag("player").GetComponent<Spawn>().HitColorAnimation());
+                    StartCoroutine(playerSpawn.HitColorAnimation());
                 }
-                
-                //StopCoroutine(GameObject.FindGameObjectWithTag("player").GetComponent<Spawn>().HitColorAnimation());
-
-
-                //Debug.Log(Player.GetComponent<Spawn>().hp);
             }
-            if (collider.tag == "castle")
+
+            // 성 피격 처리
+            if (collider.CompareTag("castle"))
             {
-                castle.GetComponent<castledata>().hp -= atk;
-                Debug.Log(castle.GetComponent<castledata>().hp);
+                castledata castleData = castle.GetComponent<castledata>();
+                castleData.hp -= atk;
+                Debug.Log(castleData.hp);
             }
         }
     }
+
     private void OnDrawGizmos()
     {
+        // 공격 판정 범위 표시
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(boxpos.position, boxSize);
+        if (boxpos != null)
+        {
+            Gizmos.DrawWireCube(boxpos.position, boxSize);
+        }
     }
 
     public IEnumerator HitColorAnimation()
     {
+        // 피격 색상 연출
         sprite.color = Color.red;
         yield return new WaitForSeconds(1f);
         sprite.color = Color.white;

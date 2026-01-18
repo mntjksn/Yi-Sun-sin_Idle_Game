@@ -1,36 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class BGM_con : MonoBehaviour
 {
-    public Button btn1, btn2, btn3, btn4;
+    // 메인 배경음 버튼
+    public Button btn1;
+    public Button btn2;
 
-    void Update()
+    // 효과음 버튼
+    public Button btn3;
+    public Button btn4;
+
+    private void Update()
     {
-        int effect_sound = PlayerPrefs.GetInt("EFFECT");
-        int main_bgm = PlayerPrefs.GetInt("BGM");
+        // 저장된 사운드 설정 값 불러오기
+        int effectSound = PlayerPrefs.GetInt("EFFECT");
+        int mainBgm = PlayerPrefs.GetInt("BGM");
 
-        if (main_bgm == 0)
+        // 메인 배경음 버튼 상태 갱신
+        if (mainBgm == 0)
         {
             btn1.interactable = false;
             btn2.interactable = true;
         }
 
-        if (main_bgm == 1)
+        if (mainBgm == 1)
         {
             btn1.interactable = true;
             btn2.interactable = false;
         }
 
-        if (effect_sound == 0)
+        // 효과음 버튼 상태 갱신
+        if (effectSound == 0)
         {
             btn3.interactable = false;
             btn4.interactable = true;
         }
 
-        if (effect_sound == 1)
+        if (effectSound == 1)
         {
             btn3.interactable = true;
             btn4.interactable = false;
@@ -39,21 +46,25 @@ public class BGM_con : MonoBehaviour
 
     public void main_bgm_on()
     {
+        // 메인 배경음 켜기
         PlayerPrefs.SetInt("BGM", 0);
     }
 
     public void main_bgm_off()
     {
+        // 메인 배경음 끄기
         PlayerPrefs.SetInt("BGM", 1);
     }
 
     public void bgm_on()
     {
+        // 효과음 켜기
         PlayerPrefs.SetInt("EFFECT", 0);
     }
 
     public void bgm_off()
     {
+        // 효과음 끄기
         PlayerPrefs.SetInt("EFFECT", 1);
     }
 }

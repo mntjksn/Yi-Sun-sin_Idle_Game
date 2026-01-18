@@ -1,61 +1,71 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    public bl_Joystick js; // 조이스틱 오브젝트를 저장할 변수라고 생각하기.
+    // 조이스틱 입력을 받기 위한 변수
+    public bl_Joystick js;
 
-    public float speed; // 조이스틱에 의해 움직일 오브젝트의 속도.
+    // 기본 이동 속도
+    public float speed;
 
+    // 보스 상태 여부
     public bool boss;
 
+    // 보스 상태에서 사용하는 속도 값
     [SerializeField]
     private float speed_3;
 
     public float Speed_3
     {
-        set => speed_3 = Mathf.Max(0, value);
         get => speed_3;
+        set => speed_3 = Mathf.Max(0, value);
     }
 
-    void Update()
+    private void Update()
     {
+        // 조이스틱 방향 벡터 계산
+        Vector3 dir = new Vector3(js.Horizontal, js.Vertical, 0f);
+        dir.Normalize();
+
+        // 보스 상태일 경우
         if (boss == true)
         {
+            // 저장된 속도 값 불러오기
             float spd = PlayerPrefs.GetFloat("Speed");
 
-            // 스틱이 향해있는 방향을 저장해준다.
-            Vector3 dir = new Vector3(js.Horizontal, js.Vertical, 0);
-
-            // Vector의 방향은 유지하지만 크기를 1로 줄인다. 길이가 정규화 되지 않을시 0으로 설정.
-            dir.Normalize();
-
-            // 오브젝트의 위치를 dir 방향으로 이동시킨다.
+            // 조이스틱 이동
             transform.position += dir * spd * Time.deltaTime;
-            //Debug.Log(spd);
 
-            //좌우 이동
-            transform.Translate(Vector2.right * (Input.GetAxisRaw("Horizontal") * spd * Time.deltaTime), Space.Self);
-            //상하 이동
-            transform.Translate(Vector2.up * (Input.GetAxisRaw("Vertical") * spd * Time.deltaTime), Space.Self);
+            // 키보드 좌우 이동
+            transform.Translate(
+                Vector2.right * Input.GetAxisRaw("Horizontal") * spd * Time.deltaTime,
+                Space.Self
+            );
+
+            // 키보드 상하 이동
+            transform.Translate(
+                Vector2.up * Input.GetAxisRaw("Vertical") * spd * Time.deltaTime,
+                Space.Self
+            );
         }
 
+        // 일반 상태일 경우
         if (boss == false)
         {
-            // 스틱이 향해있는 방향을 저장해준다.
-            Vector3 dir = new Vector3(js.Horizontal, js.Vertical, 0);
-
-            // Vector의 방향은 유지하지만 크기를 1로 줄인다. 길이가 정규화 되지 않을시 0으로 설정.
-            dir.Normalize();
-
-            // 오브젝트의 위치를 dir 방향으로 이동시킨다.
+            // 조이스틱 이동
             transform.position += dir * speed * Time.deltaTime;
 
-            //좌우 이동
-            transform.Translate(Vector2.right * (Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime), Space.Self);
-            //상하 이동
-            transform.Translate(Vector2.up * (Input.GetAxisRaw("Vertical") * speed * Time.deltaTime), Space.Self);
+            // 키보드 좌우 이동
+            transform.Translate(
+                Vector2.right * Input.GetAxisRaw("Horizontal") * speed * Time.deltaTime,
+                Space.Self
+            );
+
+            // 키보드 상하 이동
+            transform.Translate(
+                Vector2.up * Input.GetAxisRaw("Vertical") * speed * Time.deltaTime,
+                Space.Self
+            );
         }
     }
 }

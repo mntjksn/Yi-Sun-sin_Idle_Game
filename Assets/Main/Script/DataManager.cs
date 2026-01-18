@@ -1,32 +1,50 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
-using System.Linq;
+using UnityEngine;
 
 [System.Serializable]
 public class chData
 {
+    // 저장할 캐릭터 아이템 번호 목록
     public List<int> itemNum1 = new List<int>();
+
+    // 저장할 캐릭터 위치 목록
     public List<Vector3> Pos1 = new List<Vector3>();
+
+    // 해금된 아이템 번호 목록
     public List<int> itemNum2 = new List<int>();
+
+    // 사용하지 않지만 구조 유지용
     public List<int> itemNum3 = new List<int>();
+
+    // 저장 당시 캐릭터 수
     public int chCount;
+
+    // 저장 여부
     public bool save;
 }
 
 public class DataManager : MonoBehaviour
 {
-    public GameObject itemPrefabs;
-    public MergeItem mg;
-    public Merge mg1;
-    public chbool cb;
+    // 저장 데이터
     public chData data = new chData();
 
+    // 아이템 프리팹
+    public GameObject itemPrefabs;
+
+    // 캐릭터 정보 컴포넌트
+    public MergeItem mg;
+
+    // 아이템 생성 관리
+    public Merge mg1;
+
+    // 불러오기 상태 플래그
+    public chbool cb;
 
     private void Start()
     {
-        var objs = FindObjectsOfType<DataManager>();
+        // 중복 생성 방지 처리
+        DataManager[] objs = FindObjectsOfType<DataManager>();
         if (objs.Length == 1)
         {
             DontDestroyOnLoad(gameObject);
@@ -34,78 +52,88 @@ public class DataManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
+
+        // MergeItem 참조 정리
         mg = mg.GetComponent<MergeItem>();
     }
 
-    // 불러오기
     public void LoadGameData()
     {
-        int chc = GameObject.Find("chp").transform.childCount;
+        // 저장 파일 경로
         string filePath = Path.Combine(Application.persistentDataPath, "chData.json");
         print(filePath);
-        // 저장된 게임이 있다면
-        if (File.Exists(filePath))
+
+        // 저장된 파일이 없으면 종료
+        if (!File.Exists(filePath)) return;
+
+        // 저장된 파일 읽고 Json을 데이터 클래스로 변환
+        string fromJsonData = File.ReadAllText(filePath);
+        data = JsonUtility.FromJson<chData>(fromJsonData);
+
+        // 해금된 아이템 복원
+        for (int q = 0; q < data.itemNum2.Count; q++)
         {
-            // 저장된 파일 읽어오고 Json을 클래스 형식으로 전환해서 할당
-            string FromJsonData = File.ReadAllText(filePath);
-            data = JsonUtility.FromJson<chData>(FromJsonData);
-
-           for(int q= 0; q < data.itemNum2.Count; q++)
-            {
-                GameObject.Find("ItemData").transform.GetComponent<Merge>().itemdata[data.itemNum2[q]].spawncheck = true;
-            }
-
-            for(int q = 0; q < data.itemNum1.Count; q++)
-            {
-                cb.save = true;
-                mg1.objPosition1 = data.Pos1[q];
-                mg1.itemCreate(data.itemNum1[q]);
-            }
-
-            print("불러오기 완료");
+            GameObject.Find("ItemData").GetComponent<Merge>().itemdata[data.itemNum2[q]].spawncheck = true;
         }
+
+        // 캐릭터 복원
+        for (int q = 0; q < data.itemNum1.Count; q++)
+        {
+            cb.save = true;
+
+            // 생성 위치를 지정하고 생성 호출
+            mg1.objPosition1 = data.Pos1[q];
+            mg1.itemCreate(data.itemNum1[q]);
+        }
+
+        print("불러오기 완료");
     }
 
-
-    // 저장하기
     public void SaveGameData()
     {
+        // 현재 캐릭터 수
         int chc = GameObject.Find("chp").transform.childCount;
 
-        data.itemNum1.RemoveAll(chc => true);
-        data.itemNum2.RemoveAll(chc => true);
+        // 저장 리스트 초기화
+        data.itemNum1.Clear();
+        data.itemNum2.Clear();
+        data.Pos1.Clear();
 
-        for (int q =0; q < chc; q++)
-        {
-            data.itemNum1.Add(GameObject.Find("chp").transform.GetChild(q).GetComponent<MergeItem>().iN);
-        }
-
-        data.Pos1.RemoveAll(chc => true);
+        // 캐릭터 아이템 번호 저장
         for (int q = 0; q < chc; q++)
         {
-            data.Pos1.Add(GameObject.Find("chp").transform.GetChild(q).transform.position);
+            int itemNum = GameObject.Find("chp").transform.GetChild(q).GetComponent<MergeItem>().iN;
+            data.itemNum1.Add(itemNum);
         }
 
-
-        for(int q= 0; q < GameObject.Find("ItemData").transform.GetComponent<Merge>().itemdata.Count; q++)
+        // 캐릭터 위치 저장
+        for (int q = 0; q < chc; q++)
         {
-            if (GameObject.Find("ItemData").transform.GetComponent<Merge>().itemdata[q].spawncheck)
+            Vector3 pos = GameObject.Find("chp").transform.GetChild(q).transform.position;
+            data.Pos1.Add(pos);
+        }
+
+        // 해금된 아이템 저장
+        Merge merge = GameObject.Find("ItemData").GetComponent<Merge>();
+        for (int q = 0; q < merge.itemdata.Count; q++)
+        {
+            if (merge.itemdata[q].spawncheck)
             {
-                data.itemNum2.Add(GameObject.Find("ItemData").transform.GetComponent<Merge>().itemdata[q].itemNum);
+                data.itemNum2.Add(merge.itemdata[q].itemNum);
             }
         }
 
-        data.chCount = GameObject.Find("chp").transform.childCount;
+        // 저장 정보 갱신
+        data.chCount = chc;
         data.save = true;
-        // 클래스를 Json 형식으로 전환 (true : 가독성 좋게 작성)
-        string ToJsonData = JsonUtility.ToJson(data, true);
+
+        // Json으로 변환 후 저장
+        string toJsonData = JsonUtility.ToJson(data, true);
         string filePath = Path.Combine(Application.persistentDataPath, "chData.json");
+        File.WriteAllText(filePath, toJsonData);
 
-        // 이미 저장된 파일이 있다면 덮어쓰고, 없다면 새로 만들어서 저장
-        File.WriteAllText(filePath, ToJsonData);
-
-        // 올바르게 저장됐는지 확인 (자유롭게 변형)
         print("저장 완료");
     }
 }

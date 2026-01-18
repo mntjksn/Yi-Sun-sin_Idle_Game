@@ -1,106 +1,109 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
 using System.Linq;
-using System;
+using UnityEngine;
 
 [System.Serializable]
 public class Game2data1
 {
+    // 도감에 표시할 캐릭터 번호 목록
     public List<int> itemNum3 = new List<int>();
 }
 
 public class Game2Data : MonoBehaviour
 {
     public Game2data1 data = new Game2data1();
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void Game2save()
     {
+        // 현재 캐릭터 수
         int chc = GameObject.Find("chp").transform.childCount;
 
-        data.itemNum3.RemoveAll(chc => true);
+        // 리스트 초기화
+        data.itemNum3.Clear();
 
+        // 캐릭터 번호 저장
         for (int q = 0; q < chc; q++)
         {
-            data.itemNum3.Add(GameObject.Find("chp").transform.GetChild(q).GetComponent<MergeItem>().iN);
+            int itemNum = GameObject.Find("chp").transform.GetChild(q).GetComponent<MergeItem>().iN;
+            data.itemNum3.Add(itemNum);
         }
 
+        // 중복 제거 후 정렬
         data.itemNum3 = data.itemNum3.Distinct().ToList();
         data.itemNum3.Sort();
-        // 클래스를 Json 형식으로 전환 (true : 가독성 좋게 작성)
-        string ToJsonData = JsonUtility.ToJson(data, true);
+
+        // Json 변환 후 저장
+        string toJsonData = JsonUtility.ToJson(data, true);
         string filePath = Path.Combine(Application.persistentDataPath, "Game2Data.json");
+        File.WriteAllText(filePath, toJsonData);
 
-        // 이미 저장된 파일이 있다면 덮어쓰고, 없다면 새로 만들어서 저장
-        File.WriteAllText(filePath, ToJsonData);
-
-        // 올바르게 저장됐는지 확인 (자유롭게 변형)
         print("저장 완료");
     }
+
     public void Game2load()
     {
-        int chc = GameObject.Find("chp").transform.childCount;
+        // 저장 파일 경로
         string filePath = Path.Combine(Application.persistentDataPath, "Game2Data.json");
         print(filePath);
-        // 저장된 게임이 있다면
-        if (File.Exists(filePath))
+
+        // 저장 파일이 없으면 종료
+        if (!File.Exists(filePath)) return;
+
+        // 저장된 파일 읽고 Json을 데이터 클래스로 변환
+        string fromJsonData = File.ReadAllText(filePath);
+        data = JsonUtility.FromJson<Game2data1>(fromJsonData);
+
+        // 캐릭터 표시용 오브젝트 참조
+        GameObject chdataObj = GameObject.Find("chdata");
+        chnumdata chData = chdataObj.GetComponent<chnumdata>();
+
+        // 최근 12개까지만 화면에 배치
+        if (data.itemNum3.Count < 12)
         {
-            // 저장된 파일 읽어오고 Json을 클래스 형식으로 전환해서 할당
-            string FromJsonData = File.ReadAllText(filePath);
-            data = JsonUtility.FromJson<Game2data1>(FromJsonData);
-
-            if(data.itemNum3.Count < 12)
+            for (int q = 0; q < data.itemNum3.Count; q++)
             {
-                for (int q = 0; q < data.itemNum3.Count; q++)
+                chData.spawn(data.itemNum3[q]);
+                chData.chposition.x += 1.1f;
+
+                // 첫 줄 6개 배치 후 줄바꿈 처리
+                if (q == 5)
                 {
-                    GameObject.Find("chdata").GetComponent<chnumdata>().spawn(data.itemNum3[q]);
-                    GameObject.Find("chdata").GetComponent<chnumdata>().chposition.x += 1.1f;
-                    if (q == 5)
-                    {
-                        GameObject.Find("chdata").GetComponent<chnumdata>().chposition.x = -2.8f;
-                        GameObject.Find("chdata").GetComponent<chnumdata>().chposition.y = -5.3f;
-                        break;
-                    }
-                }
-                for (int q = 6; q < data.itemNum3.Count; q++)
-                {
-                    GameObject.Find("chdata").GetComponent<chnumdata>().spawn(data.itemNum3[q]);
-                    GameObject.Find("chdata").GetComponent<chnumdata>().chposition.x += 1.1f;
+                    chData.chposition.x = -2.8f;
+                    chData.chposition.y = -5.3f;
+                    break;
                 }
             }
-            else
-            {
-                for (int q = data.itemNum3.Count - 12; q < data.itemNum3.Count; q++)
-                {
-                    GameObject.Find("chdata").GetComponent<chnumdata>().spawn(data.itemNum3[q]);
-                    GameObject.Find("chdata").GetComponent<chnumdata>().chposition.x += 1.1f;
-                    if (q == data.itemNum3.Count - 7)
-                    {
-                        GameObject.Find("chdata").GetComponent<chnumdata>().chposition.x = -2.8f;
-                        GameObject.Find("chdata").GetComponent<chnumdata>().chposition.y = -5.3f;
-                        break;
-                    }
-                }
-                for (int q = data.itemNum3.Count - 6; q < data.itemNum3.Count; q++)
-                {
-                    GameObject.Find("chdata").GetComponent<chnumdata>().spawn(data.itemNum3[q]);
-                    GameObject.Find("chdata").GetComponent<chnumdata>().chposition.x += 1.1f;
-                }
-            }
-            
 
-            print("불러오기 완료");
+            for (int q = 6; q < data.itemNum3.Count; q++)
+            {
+                chData.spawn(data.itemNum3[q]);
+                chData.chposition.x += 1.1f;
+            }
         }
+        else
+        {
+            for (int q = data.itemNum3.Count - 12; q < data.itemNum3.Count; q++)
+            {
+                chData.spawn(data.itemNum3[q]);
+                chData.chposition.x += 1.1f;
+
+                // 첫 줄 6개 배치 후 줄바꿈 처리
+                if (q == data.itemNum3.Count - 7)
+                {
+                    chData.chposition.x = -2.8f;
+                    chData.chposition.y = -5.3f;
+                    break;
+                }
+            }
+
+            for (int q = data.itemNum3.Count - 6; q < data.itemNum3.Count; q++)
+            {
+                chData.spawn(data.itemNum3[q]);
+                chData.chposition.x += 1.1f;
+            }
+        }
+
+        print("불러오기 완료");
     }
 }

@@ -1,25 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Save1 : MonoBehaviour
 {
+    // 데이터 저장 관리 클래스
     public DataManager dm;
-    bool m_pause;
-    // Start is called before the first frame update
-    private void Awake()
+
+    // 일시정지 상태 체크
+    private bool m_pause;
+
+    private void Start()
     {
-        
-    }
-    void Start()
-    {
-        if(GameObject.Find("chp").transform.childCount <= 0)
+        // 자식 캐릭터가 없을 경우에만 데이터 불러오기
+        if (GameObject.Find("chp").transform.childCount <= 0)
         {
             dm.LoadGameData();
         }
     }
+
     private void OnApplicationPause(bool pause)
     {
+        // 앱이 백그라운드로 갈 때 저장
         if (pause)
         {
             dm.SaveGameData();
@@ -27,22 +27,23 @@ public class Save1 : MonoBehaviour
         }
         else
         {
+            // 복귀 시 상태 초기화
             if (m_pause)
             {
                 m_pause = false;
             }
         }
-        //dm.SaveGameData();
-        //m_pause = pause;
     }
 
     private void OnApplicationQuit()
     {
+        // 앱 종료 시 저장
         dm.SaveGameData();
     }
-    // Update is called once per frame
-    void Update()
+
+    private void Update()
     {
+        // 뒤로가기 키 입력 시 저장 후 종료
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             dm.SaveGameData();

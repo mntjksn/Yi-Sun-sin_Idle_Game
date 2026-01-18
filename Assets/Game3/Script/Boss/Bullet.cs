@@ -2,14 +2,15 @@ using UnityEngine;
 
 namespace other
 {
-    public class Bullet : MonoBehaviour {
-
+    public class Bullet : MonoBehaviour
+    {
+        // 탄환 이동 속도
         public float Speed = 10f;
 
         private void Update()
         {
-            //두번째 파라미터에 Space.World를 해줌으로써 Rotation에 의한 방향 오류를 수정함
-            transform.Translate(Vector2.right * (Speed * Time.deltaTime), Space.Self);
+            // 현재 회전 방향 기준으로 앞으로 이동
+            transform.Translate(Vector2.right * Speed * Time.deltaTime, Space.Self);
         }
     }
 }
