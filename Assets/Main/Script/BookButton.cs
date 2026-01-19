@@ -12,10 +12,14 @@ public class BookButton : MonoBehaviour
     // 책 번호
     public int booknum;
 
+
     private void Awake()
     {
         image.SetActive(false);
+    }
 
+    private void Update()
+    {
         // 버튼 컴포넌트 가져오기
         Button button = GetComponent<Button>();
 
