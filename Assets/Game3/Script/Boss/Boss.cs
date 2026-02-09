@@ -4,10 +4,10 @@ using UnityEngine.SceneManagement;
 
 public enum BossState
 {
-    MoveToAppearPoint = 0,
-    Phase01,
-    Phase02,
-    Phase03
+    MoveToAppearPoint = 0,  // 보스 위치로 이동 (중앙)
+    Phase01,    // 1단계
+    Phase02,    // 2단계  (HP 80 이하)
+    Phase03     // 3단계  (HP 40 이하)
 }
 
 public class Boss : MonoBehaviour
