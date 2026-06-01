@@ -3,7 +3,7 @@ Unity 기반 2D Merge 방치형 모바일 게임입니다.
 
 기존 방치형 성장 구조를 참고하여 팀 프로젝트로 제작하였습니다.
 
-YouTube Link : -
+YouTube Link : -  
 Google Play : 서비스 종료됨
   
 ## 프로젝트 개요
