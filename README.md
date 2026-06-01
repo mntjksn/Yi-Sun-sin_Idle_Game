@@ -1,9 +1,7 @@
 # Yi-Sun-sin Idle Game (이순신 키우기)
 Unity 기반 2D Merge 방치형 모바일 게임입니다.  
-기존 방치형 성장 구조를 참고하여 팀 프로젝트로 제작하였습니다.
 
-- YouTube Link : -
-- Google Play : 서비스 종료됨
+기존 방치형 성장 구조를 참고하여 팀 프로젝트로 제작하였습니다.
 
 ## 프로젝트 개요
 - 개발 환경 : Unity 2D
@@ -12,6 +10,9 @@ Unity 기반 2D Merge 방치형 모바일 게임입니다.
 - 개발 인원 : 3인 (팀 프로젝트)
 - 담당 역할 : 클라이언트 개발
 - 플랫폼 : Android (Mobile)
+
+- YouTube Link : -
+- Google Play : 서비스 종료됨
 
 ## 주요 기능
 - 캐릭터 합성 및 성장 시스템 (Merge) — 같은 캐릭터를 합성해 상위 캐릭터로 성장
