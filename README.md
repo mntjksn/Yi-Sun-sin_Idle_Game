@@ -2,8 +2,8 @@
 Unity 기반 2D Merge 방치형 모바일 게임입니다.  
 기존 방치형 성장 구조를 참고하여 팀 프로젝트로 제작했으며, 캐릭터 합성 및 성장, JSON 기반 데이터 저장을 중심으로 구현했습니다.  
 
-YouTube Link : -  
-Notion Link : https://app.notion.com/p/350cdb7a00eb810f89b6fa3616c5d072?source=copy_link  
+YouTube Link (플레이 영상) : -  
+Notion Link (상세 설명) : https://app.notion.com/p/350cdb7a00eb810f89b6fa3616c5d072?source=copy_link  
 Google Play : 서비스 종료됨  
   
 ## 프로젝트 개요
